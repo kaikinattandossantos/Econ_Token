@@ -38,3 +38,19 @@ def test_bad_local_translation_confidence_is_low():
     answer = '"Bom Dia" significa Aloca e pode ser usado em muitas atividades diarias.'
     confidence = estimate_local_confidence('traduz para o ingles "bom dia"', answer)
     assert confidence < 0.7
+
+def test_milky_way_stars_is_deterministic():
+    router = HybridRouter()
+    res = router.run("calcule quantas estrelas temos na via lactea")
+    assert res["route"] == "deterministic"
+    assert "100 bilhoes" in res["answer"]
+
+def test_short_milky_way_followup_is_deterministic():
+    res = try_deterministic("da galaxia via lactea")
+    assert res is not None
+    assert "estrelas" in res.text
+
+def test_bad_milky_way_answer_confidence_is_low():
+    answer = "A Terra: 840.000. Oceano Pacifico: 5,700.000. India: 2,000.000."
+    confidence = estimate_local_confidence("calcule quantas estrelas temos na via lactea", answer)
+    assert confidence < 0.7

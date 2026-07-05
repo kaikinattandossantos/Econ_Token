@@ -26,6 +26,7 @@ _COMPLEX_KEYWORDS = [
 
 _ESTIMATION_MARKERS = [
     "quantos",
+    "quantas",
     "how many",
     "estimativa",
     "estime",
@@ -47,6 +48,9 @@ def estimate_task_difficulty(task_content: str) -> float:
 
     if any(word in lowered for word in _ESTIMATION_MARKERS):
         score += 0.35
+
+    if any(word in lowered for word in ["via lactea", "milky way", "galaxia", "galaxy"]):
+        score += 0.25
 
     if any(word in lowered for word in ["code", "codigo", "código", "function", "bug", "traceback"]):
         score += 0.25
@@ -84,6 +88,9 @@ def estimate_local_confidence(task_content: str, answer: str) -> float:
     if _is_numeric_or_estimation_task(task_content) and not _contains_number(answer):
         confidence -= 0.55
 
+    if _is_milky_way_star_task(task_content) and not _looks_like_milky_way_answer(answer):
+        confidence -= 0.65
+
     if _looks_uncertain_or_refusal(answer):
         confidence -= 0.3
 
@@ -114,6 +121,8 @@ def get_escalation_reason(task_content: str, local_answer: str, confidence: floa
         return "local_model_error"
     if _is_numeric_or_estimation_task(task_content) and not _contains_number(local_answer):
         return "numeric_task_without_number"
+    if _is_milky_way_star_task(task_content) and not _looks_like_milky_way_answer(local_answer):
+        return "bad_milky_way_estimate"
     if _is_translation_task(task_content) and len(local_answer.split()) > 8:
         return "simple_translation_answer_too_long"
     if _looks_off_topic(task_content, local_answer):
@@ -137,12 +146,29 @@ def _is_numeric_or_estimation_task(task_content: str) -> bool:
     lowered = task_content.lower()
     return (
         any(marker in lowered for marker in _ESTIMATION_MARKERS)
-        or any(marker in lowered for marker in ["calcule", "calculate", "quanto", "what is"])
+        or any(marker in lowered for marker in ["calcule", "calculate", "quanto", "quanta", "what is"])
     )
 
 
 def _contains_number(text: str) -> bool:
     return bool(re.search(r"\d|10\^|million|billion|milhao|milhão|bilhao|bilhão", text.lower()))
+
+
+def _is_milky_way_star_task(task_content: str) -> bool:
+    lowered = task_content.lower()
+    mentions_milky_way = any(marker in lowered for marker in ["via lactea", "milky way"])
+    mentions_stars = any(marker in lowered for marker in ["estrela", "estrelas", "stars"])
+    return mentions_milky_way and (mentions_stars or _is_numeric_or_estimation_task(task_content))
+
+
+def _looks_like_milky_way_answer(answer: str) -> bool:
+    lowered = answer.lower()
+    mentions_milky_way = any(marker in lowered for marker in ["via lactea", "milky way"])
+    mentions_stars = any(marker in lowered for marker in ["estrela", "estrelas", "stars"])
+    has_galaxy_scale = bool(
+        re.search(r"10\^11|100\s*bilh|200\s*bilh|400\s*bilh|billion|bilhao|bilhão", lowered)
+    )
+    return mentions_milky_way and mentions_stars and has_galaxy_scale
 
 
 def _looks_uncertain_or_refusal(answer: str) -> bool:

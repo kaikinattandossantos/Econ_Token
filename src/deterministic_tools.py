@@ -55,6 +55,10 @@ def try_deterministic(task_content: str) -> Optional[DeterministicResult]:
     if sand_estimate:
         return sand_estimate
 
+    milky_way_estimate = _try_milky_way_star_estimate(task_content)
+    if milky_way_estimate:
+        return milky_way_estimate
+
     return None
 
 
@@ -162,3 +166,33 @@ def _try_boa_viagem_sand_estimate(task_content: str) -> Optional[DeterministicRe
         "dezenas de centimetros, e graos com diametro medio perto de 0,3 mm."
     )
     return DeterministicResult(text=text, task_type="known_estimation_template", confidence=0.9)
+
+
+def _try_milky_way_star_estimate(task_content: str) -> Optional[DeterministicResult]:
+    normalized = _normalized(task_content)
+    mentions_milky_way = (
+        "via lactea" in normalized
+        or "milky way" in normalized
+        or ("galaxia" in normalized and "lactea" in normalized)
+    )
+    asks_stars = (
+        "estrela" in normalized
+        or "estrelas" in normalized
+        or "stars" in normalized
+        or normalized.strip() in {"da galaxia via lactea", "da via lactea"}
+    )
+    asks_count = any(
+        marker in normalized
+        for marker in ["quantas", "quantos", "how many", "calcule", "estimate", "estime"]
+    )
+
+    if not (mentions_milky_way and (asks_stars or asks_count)):
+        return None
+
+    text = (
+        "A Via Lactea provavelmente tem algo entre 100 bilhoes e 400 bilhoes "
+        "de estrelas. Uma resposta curta e segura para estimativa e usar a "
+        "ordem de grandeza de 10^11 estrelas, com cerca de 200 bilhoes como "
+        "valor central aproximado."
+    )
+    return DeterministicResult(text=text, task_type="known_astronomy_estimate", confidence=0.92)
