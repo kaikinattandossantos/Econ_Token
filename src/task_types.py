@@ -8,6 +8,7 @@ class TaskDifficulty(Enum):
     HARD = "hard"
 
 class Route(Enum):
+    DETERMINISTIC = "deterministic"
     LOCAL = "local"
     LOCAL_COMPETITION = "local_competition"
     REMOTE = "remote"

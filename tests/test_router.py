@@ -1,7 +1,7 @@
-import pytest
 from src.router import HybridRouter
-from src.evaluator import estimate_task_difficulty, should_escalate
+from src.evaluator import estimate_local_confidence, estimate_task_difficulty, should_escalate
 from src.task_types import Task
+from src.deterministic_tools import try_deterministic
 
 def test_difficulty_estimation():
     easy_task = "What is 2+2?"
@@ -22,3 +22,19 @@ def test_router_mock_remote():
     res = router.run("Complex medical diagnosis for a rare condition involving legal implications.")
     assert "remote" in res["route"]
     assert "[MOCK REMOTE]" in res["answer"]
+
+def test_simple_translation_is_deterministic():
+    res = try_deterministic('traduz para o ingles "bom dia"')
+    assert res is not None
+    assert res.text == "Good morning."
+
+def test_boa_viagem_sand_estimate_is_deterministic():
+    router = HybridRouter()
+    res = router.run("calcule quantos graos de areia provavelmente tem na praia de BV de recife")
+    assert res["route"] == "deterministic"
+    assert "10^17" in res["answer"]
+
+def test_bad_local_translation_confidence_is_low():
+    answer = '"Bom Dia" significa Aloca e pode ser usado em muitas atividades diarias.'
+    confidence = estimate_local_confidence('traduz para o ingles "bom dia"', answer)
+    assert confidence < 0.7
