@@ -1,7 +1,3 @@
-requests
-python-dotenv
-pytest
-fastapi
-uvicorn[standard]
-pydantic
-sentence-transformers
+# Submission/runtime dependencies (Docker image + inference path).
+requests>=2.31.0,<3
+sentence-transformers>=3.0.0,<4

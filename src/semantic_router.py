@@ -6,6 +6,7 @@ never produces final answers for results.json.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Dict, List, Optional
@@ -149,6 +150,11 @@ class _SemanticRouter:
         )
 
 
+def _hub_offline_mode() -> bool:
+    flag = os.environ.get("HF_HUB_OFFLINE", "0").strip().lower()
+    return flag in {"1", "true", "yes", "on"}
+
+
 @lru_cache(maxsize=1)
 def _load_router() -> Optional[_SemanticRouter]:
     try:
@@ -156,10 +162,14 @@ def _load_router() -> Optional[_SemanticRouter]:
     except ImportError:
         return None
 
+    local_only = _hub_offline_mode()
     errors: List[Exception] = []
     for model_name in [SEMANTIC_ROUTER_MODEL, SEMANTIC_ROUTER_FALLBACK_MODEL]:
         try:
-            return _SemanticRouter(model_name, SentenceTransformer(model_name))
+            return _SemanticRouter(
+                model_name,
+                SentenceTransformer(model_name, local_files_only=local_only),
+            )
         except Exception as exc:
             errors.append(exc)
             continue
