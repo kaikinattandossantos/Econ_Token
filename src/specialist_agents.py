@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from .allowed_models import normalize_task_type
+from .deterministic_tools import is_pure_arithmetic
 from .semantic_router import semantic_route
 
 
@@ -239,6 +240,4 @@ def _normalize(text: str) -> str:
 
 
 def _looks_like_arithmetic(text: str) -> bool:
-    if not any(marker in text for marker in ["what is", "calculate", "calcule", "quanto e"]):
-        return False
-    return bool(re.search(r"\d\s*[-+*/]\s*\d", text))
+    return is_pure_arithmetic(text)

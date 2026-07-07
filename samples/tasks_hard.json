@@ -1,0 +1,34 @@
+[
+  {
+    "task_id": "logic1",
+    "prompt": "Logical reasoning: Alice is taller than Bob. Bob is taller than Carol. Carol is taller than Dave. Is Alice taller than Dave? Answer yes or no and explain briefly."
+  },
+  {
+    "task_id": "math1",
+    "prompt": "Math reasoning: A train travels 120 km in 1.5 hours, then slows down and travels 80 km in 2 hours. What is the average speed for the whole trip in km/h? Show the calculation."
+  },
+  {
+    "task_id": "code_debug1",
+    "prompt": "Debug this Python code and return the fixed version:\ndef average(nums):\n    total = 0\n    for i in range(len(nums) + 1):\n        total += nums[i]\n    return total / len(nums)\nprint(average([2, 4, 6]))"
+  },
+  {
+    "task_id": "code_gen1",
+    "prompt": "Write a Python function called is_palindrome that returns True if a string is a palindrome ignoring case and spaces. Return only the code."
+  },
+  {
+    "task_id": "ner1",
+    "prompt": "Extract named entities from this sentence and group them by type (PERSON, ORG, LOCATION, DATE): On March 12, 2024, Satya Nadella announced a partnership between Microsoft and OpenAI in San Francisco."
+  },
+  {
+    "task_id": "summary1",
+    "prompt": "Summarize the following text in 2 sentences: Remote language models are powerful but expensive. A hybrid router can classify easy tasks locally and escalate only hard prompts to a remote API. The goal is to keep accuracy high while minimizing billed tokens during batch evaluation."
+  },
+  {
+    "task_id": "factual1",
+    "prompt": "Factual QA: What is the chemical symbol for tungsten, and why is it not the same as the first letter of its English name?"
+  },
+  {
+    "task_id": "sentiment1",
+    "prompt": "Classify the sentiment as positive, neutral, or negative: The product looks premium, but customer support was slow and the refund process was frustrating."
+  }
+]

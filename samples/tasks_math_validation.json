@@ -1,0 +1,10 @@
+[
+  { "task_id": "easy1", "prompt": "2 + 2" },
+  { "task_id": "easy2", "prompt": "What is 15% of 340?" },
+  { "task_id": "easy3", "prompt": "Compute 23 * 7 + 12" },
+  { "task_id": "easy4", "prompt": "Calculate (45 - 9) / 3" },
+  { "task_id": "easy5", "prompt": "What is 8 squared?" },
+  { "task_id": "trap1", "prompt": "If a shirt costs 80 dollars and is on sale for 25% off, what is the final price?" },
+  { "task_id": "trap2", "prompt": "A train leaves at 3pm and travels 60 km in 1.5 hours. What is its speed in km/h?" },
+  { "task_id": "trap3", "prompt": "There are 24 students in a class. If 3 are absent, how many are present?" }
+]
