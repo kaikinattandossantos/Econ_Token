@@ -91,6 +91,9 @@ def estimate_local_confidence(task_content: str, answer: str) -> float:
     if _is_milky_way_star_task(task_content) and not _looks_like_milky_way_answer(answer):
         confidence -= 0.65
 
+    if _is_strength_workout_task(task_content) and not _looks_like_strength_workout_answer(answer):
+        confidence -= 0.65
+
     if _looks_uncertain_or_refusal(answer):
         confidence -= 0.3
 
@@ -123,6 +126,8 @@ def get_escalation_reason(task_content: str, local_answer: str, confidence: floa
         return "numeric_task_without_number"
     if _is_milky_way_star_task(task_content) and not _looks_like_milky_way_answer(local_answer):
         return "bad_milky_way_estimate"
+    if _is_strength_workout_task(task_content) and not _looks_like_strength_workout_answer(local_answer):
+        return "bad_strength_workout_answer"
     if _is_translation_task(task_content) and len(local_answer.split()) > 8:
         return "simple_translation_answer_too_long"
     if _looks_off_topic(task_content, local_answer):
@@ -169,6 +174,23 @@ def _looks_like_milky_way_answer(answer: str) -> bool:
         re.search(r"10\^11|100\s*bilh|200\s*bilh|400\s*bilh|billion|bilhao|bilhão", lowered)
     )
     return mentions_milky_way and mentions_stars and has_galaxy_scale
+
+
+def _is_strength_workout_task(task_content: str) -> bool:
+    lowered = task_content.lower()
+    wants_workout = any(marker in lowered for marker in ["treino", "workout", "training"])
+    mentions_strength = any(marker in lowered for marker in ["muscul", "hipertrofia", "academia", "gym"])
+    return wants_workout and mentions_strength
+
+
+def _looks_like_strength_workout_answer(answer: str) -> bool:
+    lowered = answer.lower()
+    bad_markers = ["frevo", "raquete", "choco", "palito"]
+    if any(marker in lowered for marker in bad_markers):
+        return False
+
+    exercise_markers = ["serie", "series", "série", "repet", "rosca", "triceps", "bíceps", "biceps"]
+    return sum(1 for marker in exercise_markers if marker in lowered) >= 2
 
 
 def _looks_uncertain_or_refusal(answer: str) -> bool:

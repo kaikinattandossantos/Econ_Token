@@ -41,6 +41,9 @@ def print_result(res):
     print(f"[TOTAL TOKENS]: {tokens.get('total', res.get('remote_tokens', 0))}")
     print(f"[LOCAL TOKENS]: {tokens.get('local_total', 0)}")
     print(f"[REMOTE TOKENS]: {tokens.get('remote_total', res.get('remote_tokens', 0))}")
+    print(f"[REMOTE MODEL]: {res.get('remote_model', '')}")
+    if res.get("remote_model_reason"):
+        print(f"[MODEL REASON]: {res.get('remote_model_reason')}")
     print(f"[CREDITS SPENT]: {credits.get('total_spent', 0.0)}")
     print(f"[ANSWER]:\n{res['answer']}\n")
 

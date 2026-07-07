@@ -1,9 +1,23 @@
+"""Zero-token solvers for genuinely computable tasks (Rules 6 + 8).
+
+Only pure computation is handled here (arithmetic, bounded counting). Canned
+fact templates and domain-specific hardcoded answers were removed because the
+harness uses unseen variants and those patterns violate Rule 6.
+"""
+
+from __future__ import annotations
+
 import ast
 import operator
 import re
 import unicodedata
 from dataclasses import dataclass
 from typing import Optional
+
+from .allowed_models import OFFICIAL_TASK_TYPES
+
+# Rule 5: deterministic shortcuts only tag official evaluation categories.
+DETERMINISTIC_TASK_TYPE = "math_reasoning"
 
 
 @dataclass
@@ -12,18 +26,10 @@ class DeterministicResult:
     task_type: str
     confidence: float = 1.0
 
+    def __post_init__(self) -> None:
+        if self.task_type not in OFFICIAL_TASK_TYPES:
+            raise ValueError(f"Invalid deterministic task_type: {self.task_type}")
 
-_TRANSLATIONS_TO_EN = {
-    "bom dia": "Good morning.",
-    "boa tarde": "Good afternoon.",
-    "boa noite": "Good evening.",
-    "ola": "Hello.",
-    "olá": "Hello.",
-    "obrigado": "Thank you.",
-    "obrigada": "Thank you.",
-    "por favor": "Please.",
-    "tchau": "Bye.",
-}
 
 _ALLOWED_BIN_OPS = {
     ast.Add: operator.add,
@@ -42,22 +48,14 @@ _ALLOWED_UNARY_OPS = {
 
 
 def try_deterministic(task_content: str) -> Optional[DeterministicResult]:
-    """Answer high-confidence cheap tasks without any model call."""
-    translation = _try_simple_translation(task_content)
-    if translation:
-        return translation
+    """Answer high-confidence computable tasks without any LLM call (Rule 8)."""
+    counting = _try_counting(task_content)
+    if counting:
+        return counting
 
     arithmetic = _try_simple_arithmetic(task_content)
     if arithmetic:
         return arithmetic
-
-    sand_estimate = _try_boa_viagem_sand_estimate(task_content)
-    if sand_estimate:
-        return sand_estimate
-
-    milky_way_estimate = _try_milky_way_star_estimate(task_content)
-    if milky_way_estimate:
-        return milky_way_estimate
 
     return None
 
@@ -75,48 +73,43 @@ def _normalized(text: str) -> str:
     return _compact(_strip_accents(text))
 
 
-def _extract_quoted_text(text: str) -> Optional[str]:
-    match = re.search(r'["“”](.+?)["“”]', text)
-    if match:
-        return match.group(1).strip()
-    match = re.search(r"'(.+?)'", text)
-    if match:
-        return match.group(1).strip()
-    return None
-
-
-def _try_simple_translation(task_content: str) -> Optional[DeterministicResult]:
+def _try_counting(task_content: str) -> Optional[DeterministicResult]:
+    """Emit a comma-separated integer sequence when bounds are explicit."""
     normalized = _normalized(task_content)
-    wants_english = (
-        "traduz" in normalized
-        and ("ingles" in normalized or "english" in normalized)
+    match = re.search(
+        r"\b(?:count|conte|conta)\s+(?:from|de)\s+(-?\d+)\s+(?:to|ate|até|a)\s+(-?\d+)\b",
+        normalized,
     )
-    if not wants_english:
+    if not match:
         return None
 
-    phrase = _extract_quoted_text(task_content)
-    if not phrase:
-        phrase = re.sub(r".*?(?:ingles|english)\s*:?", "", normalized).strip()
+    start = int(match.group(1))
+    end = int(match.group(2))
+    step = 1 if end >= start else -1
+    length = abs(end - start) + 1
+    if length > 250:
+        return None
 
-    key = _normalized(phrase).strip('"').strip("'")
-    if key in _TRANSLATIONS_TO_EN:
-        return DeterministicResult(
-            text=_TRANSLATIONS_TO_EN[key],
-            task_type="simple_translation",
-        )
-    return None
+    numbers = [str(number) for number in range(start, end + step, step)]
+    return DeterministicResult(
+        text=", ".join(numbers),
+        task_type=DETERMINISTIC_TASK_TYPE,
+        confidence=1.0,
+    )
 
 
 def _try_simple_arithmetic(task_content: str) -> Optional[DeterministicResult]:
+    """Safely evaluate a short arithmetic expression embedded in the prompt."""
     normalized = _normalized(task_content)
-    if not any(marker in normalized for marker in ["quanto e", "what is", "calculate", "calcule"]):
+    if not any(marker in normalized for marker in ["what is", "calculate", "calcule", "quanto e"]):
         return None
 
-    expression_match = re.search(r"[-+*/().\d\s%^]+", task_content.replace("^", "**"))
-    if not expression_match:
+    candidates = re.findall(r"[-+*/().\d\s%^]+", task_content.replace("^", "**"))
+    candidates = [item.strip() for item in candidates if re.search(r"\d", item)]
+    if not candidates:
         return None
 
-    expression = expression_match.group(0).strip()
+    expression = max(candidates, key=len)
     if not expression or len(expression) > 80:
         return None
 
@@ -127,7 +120,7 @@ def _try_simple_arithmetic(task_content: str) -> Optional[DeterministicResult]:
 
     if isinstance(value, float) and value.is_integer():
         value = int(value)
-    return DeterministicResult(text=str(value), task_type="simple_arithmetic")
+    return DeterministicResult(text=str(value), task_type=DETERMINISTIC_TASK_TYPE)
 
 
 def _safe_eval(expression: str):
@@ -145,54 +138,3 @@ def _eval_node(node):
     if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARY_OPS:
         return _ALLOWED_UNARY_OPS[type(node.op)](_eval_node(node.operand))
     raise ValueError("Unsupported expression")
-
-
-def _try_boa_viagem_sand_estimate(task_content: str) -> Optional[DeterministicResult]:
-    normalized = _normalized(task_content)
-    mentions_sand = "graos" in normalized and "areia" in normalized
-    mentions_place = (
-        "boa viagem" in normalized
-        or "praia de bv" in normalized
-        or "bv de recife" in normalized
-    )
-    if not (mentions_sand and mentions_place):
-        return None
-
-    text = (
-        "Estimativa grosseira: algo na ordem de 10^17 a 10^18 graos de areia "
-        "na Praia de Boa Viagem, em Recife. A conta depende muito das "
-        "premissas: comprimento de cerca de 8 km, faixa media de areia em "
-        "dezenas de metros, profundidade considerada de alguns centimetros a "
-        "dezenas de centimetros, e graos com diametro medio perto de 0,3 mm."
-    )
-    return DeterministicResult(text=text, task_type="known_estimation_template", confidence=0.9)
-
-
-def _try_milky_way_star_estimate(task_content: str) -> Optional[DeterministicResult]:
-    normalized = _normalized(task_content)
-    mentions_milky_way = (
-        "via lactea" in normalized
-        or "milky way" in normalized
-        or ("galaxia" in normalized and "lactea" in normalized)
-    )
-    asks_stars = (
-        "estrela" in normalized
-        or "estrelas" in normalized
-        or "stars" in normalized
-        or normalized.strip() in {"da galaxia via lactea", "da via lactea"}
-    )
-    asks_count = any(
-        marker in normalized
-        for marker in ["quantas", "quantos", "how many", "calcule", "estimate", "estime"]
-    )
-
-    if not (mentions_milky_way and (asks_stars or asks_count)):
-        return None
-
-    text = (
-        "A Via Lactea provavelmente tem algo entre 100 bilhoes e 400 bilhoes "
-        "de estrelas. Uma resposta curta e segura para estimativa e usar a "
-        "ordem de grandeza de 10^11 estrelas, com cerca de 200 bilhoes como "
-        "valor central aproximado."
-    )
-    return DeterministicResult(text=text, task_type="known_astronomy_estimate", confidence=0.92)

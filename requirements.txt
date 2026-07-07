@@ -4,3 +4,4 @@ pytest
 fastapi
 uvicorn[standard]
 pydantic
+sentence-transformers

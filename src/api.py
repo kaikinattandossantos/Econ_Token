@@ -36,7 +36,7 @@ class ChatResponse(BaseModel):
     route: str
     difficulty_score: float
     local_confidence: float
-    local_model: str
+    local_model: Optional[str] = None
     remote_model: str
     usage: dict
 

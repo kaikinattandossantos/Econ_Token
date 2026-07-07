@@ -1,76 +1,57 @@
-from .task_types import Task, Route, TaskDifficulty
-from .deterministic_tools import try_deterministic
-from .local_model import generate_local
-from .remote_fireworks import generate_remote
-from .evaluator import (
-    estimate_task_difficulty,
-    estimate_local_confidence,
-    get_escalation_reason,
-    should_escalate,
-)
-from .config import ROUTING_THRESHOLD, ENABLE_LOCAL_COMPETITION, LOCAL_MODEL_NAME, REMOTE_MODEL_NAME
+"""Track 1 submission router.
+
+Pipeline (Rules 4 + 8):
+  1. try_deterministic  -> zero scored tokens when genuinely computable
+  2. Fireworks remote   -> all LLM final answers (English only)
+
+generate_local is never used for final answers written to results.json.
+"""
+
+from __future__ import annotations
+
+from .evaluator import estimate_task_difficulty
 from .logging_utils import log_run
+from .model_router import select_remote_model
+from .remote_fireworks import generate_remote
+from .specialist_agents import analyze_task, build_remote_prompt
+from .task_types import Route, Task
+from .template_responder import try_template_response
 from .usage import build_usage_summary
 
-class HybridRouter:
-    def __init__(self):
-        self.threshold = ROUTING_THRESHOLD
 
+class HybridRouter:
     def run(self, task_content: str, task_id: str = "default"):
         task = Task(content=task_content, id=task_id)
 
-        deterministic = try_deterministic(task_content)
-        difficulty_score = estimate_task_difficulty(task_content)
+        profile = analyze_task(task_content)
+        deterministic = try_template_response(profile)
+        difficulty_score = max(estimate_task_difficulty(task_content), profile.score)
 
-        route = Route.LOCAL
-        if deterministic:
-            route = Route.DETERMINISTIC
-        elif difficulty_score >= 0.75:
-            route = Route.REMOTE
-
+        route = Route.REMOTE
         final_answer = ""
         local_conf = 0.0
-        remote_info = {}
-        local_calls = []
-        decision_reason = "initial_local_route"
+        remote_info: dict = {}
+        local_calls: list = []
+        decision_reason = "fireworks_remote_default"
 
-        if route == Route.DETERMINISTIC and deterministic:
+        if deterministic:
+            route = Route.DETERMINISTIC
             final_answer = deterministic.text
             local_conf = deterministic.confidence
-            decision_reason = deterministic.task_type
-
-        if route == Route.LOCAL:
-            if ENABLE_LOCAL_COMPETITION:
-                ans1 = generate_local(f"Task: {task_content}\nAnswer briefly.")
-                ans2 = generate_local(f"Task: {task_content}\nAnswer step by step.")
-                local_calls.extend([ans1, ans2])
-
-                final_answer = ans1["text"] if len(ans1["text"]) >= len(ans2["text"]) else ans2["text"]
-                route = Route.LOCAL_COMPETITION
-            else:
-                local_res = generate_local(task_content)
-                local_calls.append(local_res)
-                final_answer = local_res["text"]
-
-            local_conf = estimate_local_confidence(task_content, final_answer)
-
-            if should_escalate(task, final_answer, local_conf, self.threshold):
-                route = Route.REMOTE
-                decision_reason = get_escalation_reason(
-                    task_content,
-                    final_answer,
-                    local_conf,
-                    self.threshold,
-                )
-            else:
-                decision_reason = "local_answer_accepted"
-
-        if route == Route.REMOTE:
-            remote_res = generate_remote(task_content)
+            decision_reason = f"deterministic_{deterministic.task_type}"
+        else:
+            remote_prompt = build_remote_prompt(task_content, profile)
+            model_decision = select_remote_model(profile)
+            remote_res = generate_remote(
+                remote_prompt,
+                model=model_decision.model,
+                max_tokens=model_decision.max_tokens,
+                temperature=model_decision.temperature,
+            )
             final_answer = remote_res["text"]
             remote_info = remote_res
-            if decision_reason == "initial_local_route":
-                decision_reason = "high_estimated_difficulty"
+            remote_info["model_reason"] = model_decision.reason
+            decision_reason = f"fireworks_{profile.task_type}"
 
         usage = build_usage_summary(local_calls, remote_info, route.value)
 
@@ -80,13 +61,24 @@ class HybridRouter:
             "route": route.value,
             "difficulty_score": difficulty_score,
             "local_confidence": local_conf,
-            "local_model": LOCAL_MODEL_NAME,
-            "remote_model": remote_info.get("model", REMOTE_MODEL_NAME),
+            "local_model": None,
+            "remote_model": remote_info.get("model", ""),
+            "remote_model_reason": remote_info.get("model_reason", ""),
             "remote_tokens": remote_info.get("tokens_total", remote_info.get("tokens_estimated", 0)),
             "decision_reason": decision_reason,
+            "specialists": {
+                "task_type": profile.task_type,
+                "domain": profile.domain,
+                "route_hint": profile.route_hint,
+                "risk": profile.risk,
+                "complexity": profile.complexity,
+                "expected_answer": profile.expected_answer,
+                "constraints": profile.constraints,
+                "signals": profile.signals,
+                "semantic": profile.semantic,
+            },
             "usage": usage,
-            "answer": final_answer
+            "answer": final_answer,
         }
         log_run(log_data)
-
         return log_data
