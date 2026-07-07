@@ -1,0 +1,18 @@
+[
+  {
+    "task_id": "math_det",
+    "prompt": "count from 0 to 5"
+  },
+  {
+    "task_id": "math_expr",
+    "prompt": "What is 17 * 3?"
+  },
+  {
+    "task_id": "sentiment1",
+    "prompt": "Classify the sentiment as positive, neutral, or negative: I absolutely loved the AMD workshop."
+  },
+  {
+    "task_id": "factual1",
+    "prompt": "What is the capital of France?"
+  }
+]

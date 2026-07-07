@@ -13,8 +13,9 @@ except ImportError:
     def load_dotenv():
         return False
 
-# dotenv is for local dev convenience only — not used on the scored submission path.
-load_dotenv()
+# dotenv is for local dev only; disabled in the submitted Docker image (DISABLE_DOTENV=1).
+if os.getenv("DISABLE_DOTENV", "0").strip().lower() not in {"1", "true", "yes", "on"}:
+    load_dotenv()
 
 # --- DEV-ONLY local model settings (Rule 4) ---
 LOCAL_PROVIDER = os.getenv("LOCAL_PROVIDER", "ollama").lower()

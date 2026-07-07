@@ -48,6 +48,10 @@ coverage.xml
 logs/*.jsonl
 logs/*.log
 
+# Harness I/O (local docker smoke tests)
+input/
+output/
+
 # Frontend
 frontend/node_modules/
 frontend/dist/
