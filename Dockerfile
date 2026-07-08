@@ -27,6 +27,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     DISABLE_DOTENV=1 \
     HF_HUB_OFFLINE=1 \
+    HF_HUB_DISABLE_PROGRESS_BARS=1 \
     TRANSFORMERS_OFFLINE=1 \
     TOKENIZERS_PARALLELISM=false \
     HF_HOME=/app/.cache/huggingface \
@@ -47,6 +48,7 @@ COPY --from=model-cache /opt/hf-cache /app/.cache/huggingface
 
 COPY src ./src
 
-RUN python -m compileall -q src
+RUN python -m compileall -q src \
+    && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', local_files_only=True); SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', local_files_only=True)"
 
 ENTRYPOINT ["python", "-m", "src.submission"]

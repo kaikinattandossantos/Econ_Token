@@ -1,0 +1,7 @@
+---
+pid: 0
+cwd: "c:\Users\kaiki\OneDrive\Documentos\Hackathons\amd II\router_agent\router_agent"
+command: "docker buildx build --platform linux/amd64 --tag router-agent:submission --load ."
+started_at: 2026-07-07T03:11:43.379Z
+running_for_ms: 0        
+---

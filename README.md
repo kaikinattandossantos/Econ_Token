@@ -44,8 +44,10 @@ router_agent/
 ### 1. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
+
+For the submission Docker image only, use the lean `requirements.txt` (handled automatically by the Dockerfile).
 
 This installs `sentence-transformers`, which enables the optional Hugging Face semantic router. The default model is:
 
@@ -175,4 +177,3 @@ By focusing on these areas, you can systematically improve the agent's efficienc
 ---
 
 **Author**: Manus AI
-#

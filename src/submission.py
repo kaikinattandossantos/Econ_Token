@@ -42,7 +42,9 @@ def _parse_task(item: Dict[str, Any], index: int) -> Dict[str, str]:
 
 
 def load_tasks(path: Path) -> List[Dict[str, str]]:
-    with path.open("r", encoding="utf-8") as handle:
+    # utf-8-sig tolerates local Windows-generated JSON with a BOM while still
+    # reading normal UTF-8 harness files.
+    with path.open("r", encoding="utf-8-sig") as handle:
         data = json.load(handle)
 
     if not isinstance(data, list):

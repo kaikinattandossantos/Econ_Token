@@ -1,0 +1,120 @@
+[
+  {
+    "task_id": "fact1",
+    "prompt": "What is the capital city of Australia?"
+  },
+  {
+    "task_id": "fact2",
+    "prompt": "Explain why the Magna Carta is still cited today as a foundation for constitutional government, even though it was signed in 1215."
+  },
+  {
+    "task_id": "fact3",
+    "prompt": "Which gas do plants absorb from the atmosphere during photosynthesis, and what do they release in return?"
+  },
+  {
+    "task_id": "fact4",
+    "prompt": "A student asks: if vaccines train the immune system, what exactly is being trained—and against what?"
+  },
+
+  {
+    "task_id": "sent1",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral: 'The hotel room was spotless, the staff were friendly, and breakfast exceeded expectations.'"
+  },
+  {
+    "task_id": "sent2",
+    "prompt": "How would you label the tone of this message—positive, negative, or neutral? 'The package arrived three weeks late and customer support never replied to my emails.'"
+  },
+  {
+    "task_id": "sent3",
+    "prompt": "Analyze the sentiment of: 'The graphics were breathtaking and the soundtrack was gorgeous, but the story made no sense and the final boss fight felt unfair.' Is it purely positive or negative?"
+  },
+  {
+    "task_id": "sent4",
+    "prompt": "What sentiment does this express—positive, negative, neutral, or mixed? 'Wonderful, another all-hands at 7am on Monday; I'm thrilled.'"
+  },
+
+  {
+    "task_id": "sum1",
+    "prompt": "Summarize the following passage in exactly one sentence:\n\nRemote work became widespread during the pandemic and forced companies to rethink office leases, collaboration tools, and hiring geography. Many employees reported higher flexibility but also blurred boundaries between work and home. By 2024, hybrid schedules had become the most common compromise in knowledge industries."
+  },
+  {
+    "task_id": "sum2",
+    "prompt": "Read this text and return the main points as a bullet list (3–5 bullets):\n\nRegular exercise improves cardiovascular health, sleep quality, and mood. Strength training helps preserve muscle mass as people age. Even short daily walks can reduce sedentary risk. Public health agencies recommend mixing aerobic and resistance activity across the week."
+  },
+  {
+    "task_id": "sum3",
+    "prompt": "In at most 20 words, summarize:\n\nThe James Webb Space Telescope observes infrared light from distant galaxies, helping astronomers study early universe formation and exoplanet atmospheres."
+  },
+  {
+    "task_id": "sum4",
+    "prompt": "TL;DR this email thread in two short sentences:\n\nFrom: PM — We need to delay the release by one sprint because QA found regressions in checkout. From: Eng lead — Root cause is a cache invalidation bug; fix is in review. From: Sales — Two enterprise clients expect the feature next month."
+  },
+
+  {
+    "task_id": "ner1",
+    "prompt": "Extract named entities (people, organizations, locations, dates) from this text and group them by type:\n\nOn March 14, 2023, Dr. Elena Morales of the World Health Organization met with officials in Geneva to discuss outbreak response funding with Médecins Sans Frontières."
+  },
+  {
+    "task_id": "ner2",
+    "prompt": "Identify entities in this headline-style line: 'Tesla shares fall after Elon Musk comments at Austin factory event'"
+  },
+  {
+    "task_id": "ner3",
+    "prompt": "Pull out named entities from: 'Jordan signed a sponsorship deal with Nike after playing in Chicago.' List each entity and note if it could refer to more than one real-world referent (person, place, or brand)."
+  },
+  {
+    "task_id": "ner4",
+    "prompt": "From the sentence below, extract PERSON, ORG, and GPE entities. Flag any token that is ambiguous without extra context.\n\n'Apple acquired a startup in Cupertino while Amazon expanded its logistics hub near Appleton.'"
+  },
+
+  {
+    "task_id": "dbg1",
+    "prompt": "Debug this Python code and explain the fix:\n\ndef greet(name)\n    print(f'Hello, {name}')\n\ngreet('Ada')"
+  },
+  {
+    "task_id": "dbg2",
+    "prompt": "Why does this function return 0 instead of the sum of positive numbers? Fix it.\n\ndef sum_positives(nums):\n    total = 0\n    for n in nums:\n        if n > 0\n            total += n\n    return total"
+  },
+  {
+    "task_id": "dbg3",
+    "prompt": "Find the off-by-one bug and correct the code:\n\ndef first_n_squares(n):\n    return [i * i for i in range(1, n)]  # should return squares for 1..n inclusive"
+  },
+  {
+    "task_id": "dbg4",
+    "prompt": "This snippet skips elements unpredictably. Explain why and provide a fixed version:\n\ndef remove_even(nums):\n    i = 0\n    while i < len(nums):\n        if nums[i] % 2 == 0:\n            nums.pop(i)\n        i += 1\n    return nums"
+  },
+
+  {
+    "task_id": "code1",
+    "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if the string reads the same forwards and backwards, ignoring case and non-alphanumeric characters."
+  },
+  {
+    "task_id": "code2",
+    "prompt": "Implement a Python function that processes a list of numbers."
+  },
+  {
+    "task_id": "code3",
+    "prompt": "Create a Python class `Counter` with methods `increment()`, `decrement()`, and `value()` that tracks an integer starting at 0. Thread-safety is not required."
+  },
+  {
+    "task_id": "code4",
+    "prompt": "Build something in Python that handles user input from the command line."
+  },
+
+  {
+    "task_id": "logic1",
+    "prompt": "Logic puzzle: Five houses in a row are painted different colors. The red house is immediately to the left of the green house. The blue house is not at either end. The white house is at the far right. The owner of the yellow house keeps cats. Who keeps cats, and what is the left-to-right order of house colors?"
+  },
+  {
+    "task_id": "logic2",
+    "prompt": "All mammals are warm-blooded. All whales are mammals. Some marine animals are whales. What can we validly conclude about whales and warm-bloodedness? State the conclusion and whether it follows deductively."
+  },
+  {
+    "task_id": "logic3",
+    "prompt": "Three friends—Ava, Ben, and Cara—each picked a different fruit: apple, banana, or cherry. Ava did not pick banana. The person who picked apple is not Ben. Cara picked cherry. Who picked which fruit?"
+  },
+  {
+    "task_id": "logic4",
+    "prompt": "Riddle: I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I? Show brief reasoning before the answer."
+  }
+]

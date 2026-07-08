@@ -8,7 +8,11 @@ import shutil
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*_args, **_kwargs):
+        return False
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:

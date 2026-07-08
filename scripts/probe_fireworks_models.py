@@ -5,7 +5,12 @@ import sys
 from pathlib import Path
 
 import requests
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*_args, **_kwargs):
+        return False
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")

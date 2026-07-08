@@ -1,0 +1,6 @@
+[
+  { "task_id": "sent3", "prompt": "Analyze the sentiment of: 'The graphics were breathtaking and the soundtrack was gorgeous, but the story made no sense and the final boss fight felt unfair.' Is it purely positive or negative?" },
+  { "task_id": "dbg2", "prompt": "Why does this function return 0 instead of the sum of positive numbers? Fix it.\n\ndef sum_positives(nums):\n    total = 0\n    for n in nums:\n        if n > 0\n            total += n\n    return total" },
+  { "task_id": "dbg4", "prompt": "This snippet skips elements unpredictably. Explain why and provide a fixed version:\n\ndef remove_even(nums):\n    i = 0\n    while i < len(nums):\n        if nums[i] % 2 == 0:\n            nums.pop(i)\n        i += 1\n    return nums" },
+  { "task_id": "logic1", "prompt": "Logic puzzle: Five houses in a row are painted different colors. The red house is immediately to the left of the green house. The blue house is not at either end. The white house is at the far right. The owner of the yellow house keeps cats. Who keeps cats, and what is the left-to-right order of house colors?" }
+]
